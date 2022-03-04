@@ -27,6 +27,7 @@ let config = {
 let game = new Phaser.Game(config);
 let cursors;
 let player_img;
+let player_scale_size = 0.2;
 let player_speed = 2;
 let player_x = 425;
 let player_y = 50;
@@ -95,7 +96,7 @@ function create ()
 	enemy3_img = this.add.image(100, 350, "enemy3");
 	this.physics.add.existing(enemy3_img, false);
 
-	player_img.setScale(scale_size);
+	player_img.setScale(player_scale_size);
 
 	enemy_img.setScale(scale_size);
 	enemy_img.flipX = true;

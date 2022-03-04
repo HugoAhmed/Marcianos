@@ -22,9 +22,9 @@ let http_server = http.createServer(function(req, res)
 		return
 	}
 	
-	if (req.url == "/character.png")
+	if (req.url == "/spaceship.png")
 	{
-		fs.readFile("character.png", function(err, data)
+		fs.readFile("spaceship.png", function(err, data)
 		{
 			if(err)
 			{
