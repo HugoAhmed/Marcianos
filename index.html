@@ -1,8 +1,8 @@
-<title>Cruzando la Calle Simulator</title>
+<title>MataMarcianos</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
 </head>
 <body>
-<h1>Te falta calle</h1>
+<h1>Te falta Universo</h1>
 <script>
 let game_w = 800;
 let game_h = 600;
@@ -26,11 +26,12 @@ let config = {
 
 let game = new Phaser.Game(config);
 let cursors;
+//Player
 let player_img;
-let player_scale_size = 0.2;
-let player_speed = 5;
-let player_x = 100;
-let player_y = 300;
+let player_speed = 4;
+let player_x = 75;
+let player_y = 50;
+//Enemies
 let enemy_img;
 let enemy1_img;
 let enemy2_img;
@@ -38,44 +39,66 @@ let enemy3_img;
 let enemy_up_speed = 2;
 let enemy_down_speed = 1.5;
 let offset_x = -128;
+//Enemy Spawn
+let enemy_x = 1000;
+let enemy1_x = 960;
+let enemy2_x = 1100;
+let enemy3_x = 1080;
+//bullet
+let bullet_img;
+let bullet1_img;
+let bullet2_img;
+let bullet_scale = 0.4;
+let bullet_speed = 5;
+let key_pressed = false;
+//Tamaño y rotacion
+let player_scale = 0.25;
 let scale_size = 1.5;
+let scale2_size = 1;
+let rotate = 90;
+//Lives and Score
 let lives = 3;
 let score = 0;
+let bullet = 3;
 let lives_txt;
 let score_txt;
-let crossing = false;
+//Arrays
+let enemies;
+let bullets;
 
+//Reinicio spawns
 function reset ()
 {
-	crossing = false;
 
 	player_img.x = player_x;
 	player_img.y = player_y;
 
-	enemy_img.x = 1000;
+	enemy_img.x = enemy_x;
 	enemy_img.y = 145;
 
-	enemy1_img.x = 1000;
+	enemy1_img.x = enemy1_x;
 	enemy1_img.y = 245;
 
-	enemy2_img.x = 1000;
+	enemy2_img.x = enemy2_x;
 	enemy2_img.y = 450;
 
-	enemy3_img.x = 1000;
+	enemy3_img.x = enemy3_x;
 	enemy3_img.y = 350;
-}
 
+	bullet_img.x = 10000;
+	bullet1_img.x= 10001;
+	bullet2_img.x = 10002;
+}
+//Cargar imagenes
 function preload ()
 {
 	this.load.image('character', 'spaceship.png');
     this.load.image('enemy','enemy_ship.png');
-    this.load.image('enemy1', 'enemy_ship.png');
-    this.load.image('enemy2','enemy_ship.png');
-    this.load.image('enemy3', 'enemy_ship.png');
     this.load.image('background', 'background.png');
+	this.load.image('bullet', 'bullett.png');
 }
 
-
+//Crear imagenes, collisiones.
 function create ()
 {
 	cursors = this.input.keyboard.createCursorKeys();
@@ -84,30 +107,53 @@ function create ()
 
 	player_img = this.add.image(player_x, player_y, "character");
 	this.physics.add.existing(player_img, false);
-
-
-	enemy_img = this.add.image(1000, 145, "enemy");
-	this.physics.add.existing(enemy_img, false);
-	enemy1_img = this.add.image(1000, 245, "enemy1");
-	this.physics.add.existing(enemy1_img, false);
-	enemy2_img = this.add.image(1000, 450, "enemy2");
-	this.physics.add.existing(enemy2_img, false);
-	enemy3_img = this.add.image(500, 350, "enemy3");
-	this.physics.add.existing(enemy3_img, false);
-
-	player_img.setScale(player_scale_size);
 	
-	enemy_img.setScale(scale_size);
-	enemy_img.flipX = true;
-	enemy1_img.setScale(scale_size);
-	enemy1_img.flipX = true;
+	enemy_img = this.add.image(enemy_x, 145, "enemy");
+	enemy1_img = this.add.image(enemy1_x, 245, "enemy");
+	enemy2_img = this.add.image(enemy2_x, 450, "enemy");
+	enemy3_img = this.add.image(enemy3_x, 350, "enemy");
+	bullet_img = this.add.image(10000,10000, "bullet");
+	bullet1_img = this.add.image(10001,10001,"bullet");
+	bullet2_img = this.add.image(10002,10002,"bullet");
 
-	enemy2_img.setScale(scale_size);
-	enemy2_img.flipX = true;
-	enemy3_img.setScale(scale_size);
-	enemy3_img.flipX = true;
+	enemies = [enemy_img, enemy1_img, enemy2_img, enemy3_img];
+	bullets = [bullet_img, bullet1_img, bullet2_img];
+	//Escalado y colisiones
+	for (let i = 0; i < enemies.length; i++)
+	{
+		this.physics.add.existing(enemies[i], false);
+	}
+	player_img.setScale(player_scale);
+	
+	for(let i = 0; i < enemies.length; i++)
+	{
+		enemies[i].setScale(scale_size);
+		enemies[i].flipX = true;
+		enemies[i].angle = rotate;
+	}
+	for(let i = 0; i < bullets.length; i++)
+	{
+		bullets[i].setScale(bullet_scale);
+	}
 
-	let enemies = [enemy_img, enemy1_img, enemy2_img, enemy3_img];
+	for(let i = 0; i < bullets.length; i++)
+	{
+		this.physics.add.existing(bullets[i], false);
+	}
+
+	for (let i = 0; i < bullets.length; i++)
+	{
+		for (let j = 0; j < enemies.length; j++)
+		this.physics.add.collider(bullets[i], enemies[j], function(bullets, enemies)
+		{
+			enemies = [enemy_img, enemy1_img, enemy2_img, enemy3_img]
+			bullets = [bullet_img, bullet1_img, bullet2_img]
+			reset_enemy(enemies[j]);
+			reset_bullet(bullets[i]);
+			score += 1;
+			score_txt.text = score.toString();
+		});
+	}
 
 	for (let i = 0; i < enemies.length; i++){
 		this.physics.add.collider(player_img, enemies[i], function (player, enemies){
@@ -115,13 +161,32 @@ function create ()
 
 			lives--;
 			lives_txt.text = lives.toString();
-			if (lives == 0)
+			if (lives <= 0)
 			{
-				lives_txt = this.add.text (660, 64, "You died");
+				lives = 3;
+				score = 0;
+				lives_txt.text = lives.toString();
+				score_txt.text = score.toString();
+				reset();
 			}
 		});
 	}
-	
+	let bullet_count = 0;
+	cursors.space.on('down', function(event){
+	if (!key_pressed)
+	{
+	bullets[bullet_count].x = player_img.x + 75;
+	bullets[bullet_count].y = player_img.y;
+	bullet_count++;
+		if(bullet_count >= bullets.length) 
+		{
+			bullet_count = 0;
+		}
+	}
+	});
+	cursors.space.on('up', function(event){
+	key_pressed = false;
+	});
 	
 	this.add.text(600, 60, "Vidas: ");
 	lives_txt = this.add.text (660, 60, "3");
@@ -133,6 +198,10 @@ function create ()
 
 function update ()
 {
+	bullet_img.x += bullet_speed;
+	bullet1_img.x += bullet_speed;
+	bullet2_img.x += bullet_speed;
+	
 	if (cursors.up.isDown){
 		player_img.y -= player_speed;
 	}
@@ -140,21 +209,48 @@ function update ()
 		player_img.y += player_speed;		
 	}
 
+	for(let i = 0; i < enemies.length; i++)
+	{
+		enemies[i].x -= enemy_up_speed;
+	}
 
-	enemy_img.x -= enemy_up_speed;
-	enemy1_img.x -= enemy_down_speed;
-	enemy2_img.x -= enemy_up_speed;
-	enemy3_img.x -= enemy_down_speed;
-
-	if (player_img.y > game_h - 50)
-		crossing = true;
-	else if (player_img.y <= 50  && crossing){
-		crossing = false;
-		score++;
-		score_txt.text = score.toString();
+	for (let i = 0; i < enemies.length; i++)
+	{
+		flipcar(enemies[i]);
+	}
+	for (let i = 0; i < enemies.length; i++)
+	{
+	    if (enemies[i].x == 0)
+		    {
+			     lives = lives - 1;
+				 lives_txt.text= lives.toString();
+				 if(lives <= 0)
+				 {
+					lives = 3;
+					score = 0;
+					lives_txt.text = lives.toString();
+					score_txt.text = score.toString();
+					reset();
+				 }
+			}
 	}
 }
 
+function flipcar (enemy){
+	if (enemy.flipX && enemy.x < offset_x)
+		enemy.x = game_w - offset_x;
+}
+
+function reset_enemy (enemy){
+    enemy.x = 1000;
+}
+
+
+function reset_bullet(bullet)
+{
+    bullet.x = 10000;
+	bullet.y = 10000;
+}
 </script>
 <h2>Vaya troncho</h2>
 </body>

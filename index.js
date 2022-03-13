@@ -1,6 +1,4 @@
-#!/usr/bin/node
-
-let http = require("http");
+re("http");
 let fs = require("fs");
 
 
@@ -53,9 +51,9 @@ let http_server = http.createServer(function(req, res)
 		return
 	}
 
-	if (req.url == "/car_blue.jpg")
+	if (req.url == "/bullett.png")
 	{
-		fs.readFile("car_blue.jpg", function (err, data)
+		fs.readFile("bullett.png", function (err, data)
 		{
 			if (err)
 			{
@@ -108,4 +106,4 @@ let http_server = http.createServer(function(req, res)
 		res.writeHead(200);
 		res.end(data);
 	});
-}).listen(1085)
+}).listen(1085)ae
